@@ -56,6 +56,10 @@ void init_multi_class_queue(struct multi_class_queue* mcq, char *file_name,
             sscanf(line, "%s %u %u %u %u", key, &(class_id), &(mcq->thresholds[class_id]),
                                         &(mcq->tos_map[class_id]), &(mcq->multi_programming_level[class_id]));
         
+            printf("DEBUG: %u %u %u %u \n",class_id, &(mcq->thresholds[class_id]),
+                                        &(mcq->tos_map[class_id]), &(mcq->multi_programming_level[class_id]));
+
+
             num_classes++;
         }
         else if (!strcmp(key, "use_seq"))
