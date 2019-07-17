@@ -1,6 +1,0 @@
-server 10.1.1.7 5001
-sequencer 10.1.1.7 6001
-req_size_dist /users/abdffsm/2D/run_expt/VL2_CDF.txt
-rate 10000Mbps 100
-threshold 3400 tos 4 mpl 10000
-use_seq 0
