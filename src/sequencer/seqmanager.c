@@ -20,7 +20,7 @@ void init_seq_manager(struct seq_manager *sm, char *file_name)
         {
             sscanf(line, "%s %s %u", key, sm->seq_addr, &(sm->seq_port));
         }
-        else if (!strcmp(key, "threshold"))
+        else if (!strcmp(key, "class"))
         {
             sm->num_classes+=1;
         }
