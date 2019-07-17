@@ -5,11 +5,9 @@ def arr2str(arr):
 	arr = ','.join(arr)
 	return arr
 
-# Constant 
-tos=[4,32,40,56,72,128,152,184,192,224]
 
 # Full path of main directory
-directory="/users/abdffsm/2D"
+directory=os.getcwd()
 
 # Workload
 workload = "VL2_CDF.txt"
@@ -27,6 +25,8 @@ sequencerPort = ["6001"]
 
 # Class variables (thresholds, rates=linkrate*ratios, multiplexing level (1=FIFO/class))
 # These can be chosen according to workload (see setup/class_description.tr)
+tos=[4,32,40,56,72,128,152,184,192,224]
+
 thresholds=[3400,16176,545316,5159030,129372452,129372452]
 mpl=[1,1,1,1,1,1,1,1,1,1]
 ratios=[0.71,0.097,0.1,0.045,0.028,0.020]
@@ -60,8 +60,3 @@ fd.close()
 
 # Make latest
 os.system("sudo make")
-
-# Copying latest files to run_expt
-os.system("cp %s/bin/client %s/run_expt/" % (directory, directory))
-os.system("cp %s/bin/sequencer %s/run_expt/" % (directory, directory))
-os.system("cp %s/bin/server %s/run_expt/" % (directory, directory))

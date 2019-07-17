@@ -1,82 +1,63 @@
-# Traffic Generator
+# 2D
 ## Brief Introduction
-A simple traffic generator for network experiments.
+Multi class scheduler (MSC) running on top of a Traffic Generator for network experiments.
 
-The **server** listens for incoming requests, and replies with a *flow* with the requested size (using the requested DSCP value & sending at the requested rate) for each request.
+The MSC is a general job scheduling framework and can be used by different job types (e.g., compute, network) and different scheduling policies (e.g., FIFO).
 
-The **client** establishes *persistent TCP connections* to a list of servers and randomly generates requests over TCP connections according to the client configuration file. *If no available TCP connection, the client will establish a new one*. Currently, we provide two types of clients: **client** and **incast-client** for dynamic flow experiments. For **client**, each request only consists of one flow (fanout = 1). For **incast-client**, each request can consist of several synchronized *incast-like* flows. A request is completed only when all its flows are completed.  
+This guide focuses on providing scheduling support for a network Traffic Generator.
 
-In the **client configuration file**, the user can specify the list of destination servers, the request size distribution, the Differentiated Services Code Point (DSCP) value distribution, the sending rate distribution and the request fanout distribution, . 
+### Multi Class Scheduler (MCS)
+Each class in the **MSC** consists a *k-FIFO scheduler* with its own *FIFO queue*.
+It is completely characterized by three variables: 1) *Job size threshold*, 2) *Rate*, and *multiplexing level k*
+Class variables are read from a configuration file.
+
+Each job generated is mapped to one of the classes
+based on the requested size and the size threshold of that class.
+
+The scheduling policy for each class is k-FIFO where k is the maxmium multiplexing level. Different classes can have different multiplexing levels. The rate of each class defines its maxmium resource capacity and is enforced differently for different resources.
+
+It exposes a simple interface (request_handler, response_handler) that can be used by different job generation applications. 
+
+The **MCS** can support a variety of different scheduling policies e.g., FIFO, **([2D](https://dl.acm.org/citation.cfm?id=3281429))**, Processor Sharing (PS) for different job types as long as the interface is supported by the job generator.
+
+
+### Support for Traffic Generator
+For details of the Traffic Generator see **https://github.com/HKUST-SING/TrafficGenerator**
+
+The Traffic Generator implements a **server-client** traffic model.
+
+The **server** listens for incoming requests, and replies with a *TCP flow* of the requested size.
+
+The **client** generates requests over TCP using a client configuration file.
+
+The **client** instantiates the **MCS** and uses the interface to interact with it. The *request_handler* is used whenever a flow is generated while the *response_handler* is invoked upon completion of a request.
+
+The **MCS** optionally interacts with a **sequencer** to ensure global ordering across differnet client machines. To get a sequence number it uses persistant TCP connections and listens for FIN broadcasts from other clients to know of a requests turn. 
+
+Class rates are enforced at the **server** using Linux HTB.
+**MCS** annotates each scheduled request with a ToS bit, unique to each class, which is used by the HTB at the server link.
+
 
 ## Build
-In the main directory, run ```make```, then you will see **client**, **incast-client**, **simple-client** (generate static flows for simple test), **server** and some python scripts in ./bin.    
+The setup.py script in the main directory is responsible for building executables and setting up the configuration file to be used by the **client** and **MCS**. Additionally, it sets up class rates at the **server**.
 
-## Quick Start
-In the main directory, do following operations:
-- Start server 
+The Workload, link rate, server IP+port and sequencer IP+port need to be set in the setup.py file.
+
+After the setup.py file has been modified, run ```python setup.py```.
+You can see the executables in the ./bin folder and the configuration file in the ./conf folder. 
+
+
+## Single Client-Single Server experiment
+
+The run_one_to_one.py scipts starts a client server traffic generator.
+The first argument is the total number of flows and second argument is the offered load (in percentage).
+The default is 100000 and 80.0 respectivelty
+
+For instance, to start a client that will generate 5000 flows at 50.0% load, run the following:
+
 ```
-./bin/server -p 5001 -d
+python run_one_to_one.py -n 5000 -p 50.0
 ```
-
-- Start client
-```
-./bin/client -b 900 -c conf/client_config.txt -n 5000 -l flows.txt -s 123 -r bin/result.py
-```
-
-- Start incast-client
-```
-./bin/incast-client -b 900 -c conf/incast_client_config.txt -n 5000 -l log -s 123 -r bin/result.py
-```
-
-## Command Line Arguments
-### Server
-Example:
-```
-./bin/server -p 5001 -d  
-```
-* **-p** : the TCP **port** that the server listens on (default 5001)
-
-* **-v** : give more detailed output (**verbose**)
-
-* **-d** : run the server as a **daemon**
-
-* **-h** : display help information
-
-### Client
-Example:
-```
-./bin/client -b 900 -c conf/client_config.txt -n 5000 -l flows.txt -s 123 -r bin/result.py
-```
-* **-b** : desired average RX **bandwidth** in Mbits/sec
- 
-* **-c** : **configuration** file which specifies workload characteristics (required)
-
-* **-n** : **number** of requests (instead of -t)
-
-* **-t** : **time** in seconds to generate requests (instead of -n)
- 
-* **-l** : **log** file with flow completion times (default flows.txt)
-
-* **-s** : **seed** to generate random numbers (default current system time)
-
-* **-r** : python script to parse **result** files
-
-* **-v** : give more detailed output (**verbose**)
-
-* **-h** : display **help** information
-
-Note that you need to specify either the number of requests (-n) or the time to generate requests (-t). But you cannot specify both of them.
-
-### Incast-Client
-Example:
-```
-./bin/incast-client -b 900 -c conf/incast_client_config.txt -l log -s 123 -r bin/result.py
-```
-
-Same as **client** except for **-l**
-
-* **-l** : **log** file name prefix (default log)<br>
-The prefix is used for the two output files with flow and request completion times.
 
 ## Client Configuration File
 The client configuration file specifies the list of servers, the request size distribution, the Differentiated Services Code Point (DSCP) value distribution, the sending rate distribution and the request fanout distribution (only for **incast-client**). We provide several client configuration files as examples in ./conf directory.  
