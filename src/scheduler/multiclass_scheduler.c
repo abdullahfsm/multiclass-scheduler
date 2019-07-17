@@ -1,4 +1,4 @@
-#include "multiclassqueue.h"
+#include "multiclass_scheduler.h"
 
 #ifndef max
     #define max(a,b) ((a) > (b) ? (a) : (b))
