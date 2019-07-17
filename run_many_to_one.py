@@ -1,8 +1,7 @@
-import os, sys
+import os, sys, random
 
-# Precomputed seeds
-seeds=[2193,4591,5467,9174,8120,3926,8612,6321,9492,100634,45610,1205,18522,18,23588,138484,21848,215498,38413,98453,8883,499213,8879,6482,96345,94382,45682]
-
+# constant seed for reproducibility
+random.seed(4591)
 
 # Default Offered load (%/100)
 pload=80.0
@@ -10,20 +9,13 @@ pload=80.0
 # Default Num flows
 num_flows=100000
 
-if len(sys.argv == 2):
-	num_flows = int(sys.argv[1])
-elif len(sys.argv == 3):
-	pload = float(sys.argv[2])
+if len(sys.argv) > 1:
+	for i in range(1,len(sys.argv),2):
+		if sys.argv[i] == "-n":
+			num_flows = int(sys.argv[i+1])
+		elif sys.argv[i] == "-p":
+			pload = float(sys.argv[i+1])
 
-# Client IPs
-clients=["n0","n1","n2","n3","n4"]
-num_clients=len(clients)
-load = int((link_rate*pload)/(num_clients*100.0))
-
-
-print "pload: %.1f" % pload
-print "load: %.1fMbps" % load
-print "num_flows: %d" % num_flows
 
 directory=os.getcwd()
 
@@ -39,17 +31,22 @@ for f in ft:
 		servers.append(f.split(' ')[1])
 	elif "sequencer" in f:
 		sequencers.append(f.split(' ')[1])
-	elif "link_rate" in f:
+	elif "rate" in f:
 		link_rate = int(f.split(' ')[1].split('M')[0])
 
+
+# Client IPs
+clients=["n0","n1","n2","n3","n4"]
+num_clients=len(clients)
+load = int((link_rate*pload)/(num_clients*100.0))
+
+
+print "pload: %.1f" % pload
+print "load: %.1fMbps" % load
+print "num_flows: %d" % num_flows
+
+
 assert link_rate > 0
-
-
-print "Refreshing servers+sequencers.."
-
-
-print "Making results directory.."
-os.system("mkdir %s/results"%directory)
 
 print "Starting servers.."
 for server in servers:
@@ -66,5 +63,6 @@ os.system("sleep 1")
 print "Starting clients.."
 i=0
 for client in clients:
+	seed = random.uniform(1000,10000)
 	os.system("ssh -o StrictHostKeyChecking=no %s killall client" % client)
-	os.system("ssh -o StrictHostKeyChecking=no %s screen -d -m %s/bin/client -b %d -c %s/conf/client_config.txt -n %d -l %s/results/%s_fct -s %d"%(client, directory, load, directory, num_flows, directory ,client, seeds[i]))
+	os.system("ssh -o StrictHostKeyChecking=no %s screen -d -m %s/bin/client -b %d -c %s/conf/client_config.txt -n %d -l %s/results/%s_fct -s %d"%(client, directory, load, directory, num_flows, directory ,client, seed))

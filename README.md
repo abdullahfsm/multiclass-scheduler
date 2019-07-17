@@ -13,8 +13,8 @@ Class variables are read from a configuration file.
 
 Each job generated is mapped to one of the classes
 based on the job size and the size threshold of that class.
-The scheduling policy for each class is k-FIFO where k is the maxmium multiplexing level.
-Different classes can have different multiplexing levels.
+The scheduling policy for each class is k-FIFO where k is the maxmium multiplexing level (mpl).
+Different classes can have different mpls.
 The rate of each class defines its maxmium resource capacity and is enforced differently for different resources (e.g., rate-limiters for network flows).
 
 It exposes a simple interface (request_handler, response_handler, processing_function) that can be used by different job generation applications.
@@ -54,7 +54,7 @@ You can see the executables in the ./bin folder and the configuration file in th
 
 ## Single Client-Single Server experiment
 
-The run_one_to_one.py scipt starts a client-server traffic generator.
+The run_one_to_one.py script starts a client-server traffic generator.
 The first argument is the total number of flows and second argument is the offered load (in percentage).
 The default is 100000 and 80.0 respectivelty
 
@@ -66,7 +66,7 @@ python run_one_to_one.py -n 5000 -p 50.0
 
 ## Configuration File
 The client configuration file (see conf/client_config.txt) specifies information for the **client** (e.g., servers, workload).
-It is also specifies list of sequencers, class thresholds, tos mapping and multiplexing level to be used by the **MCS**.
+It also specifies list of sequencers, class thresholds, tos mapping and mpl to be used by the **MCS**.
 
 The format is a sequence of key and value(s), one key per line.
 
@@ -75,7 +75,7 @@ The format is a sequence of key and value(s), one key per line.
 sequencer 192.168.1.51 5001
 ```
 
-* **class:** classID, its threshold, unique ToS and Multiplexing level.
+* **class:** classID, its threshold, unique ToS and mpl.
 ```
 class 0 3400 4 1
 ```
@@ -85,6 +85,34 @@ There must atleast be one class entry.
 ```
 use_seq 0
 ```
+
+## Different Scheduling Policies
+We describe how different policies can be realised by changing the configuration file (manually or overriding setup.py):
+
+**FIFO**. Use a single class, with any threshold, and 1 mpl and enable sequencer. No rate limit is needed at server: 
+```
+class 0 1000 4 1
+use_seq 1
+```
+
+**PS**. Use a single class, with any threshold, and a large mpl (e.g., 10000). Disable sequencer. No rate limit is needed at server:
+```
+class 0 1000 4 10000
+use_seq 0
+```
+
+**2D**. See ./setup/class_description.tr for thresholds for different workloads.
+For example for VL2 workload:
+```
+class 0 3400 4 1
+class 1 16176 32 1
+class 2 545316 40 1
+class 3 5159030 56 1
+class 4 129372452 72 1
+class 5 129372452 128 1
+use_seq 1
+```
+
 
 ##Output
 A successful run of **client** creates a file with flow completion time results.
