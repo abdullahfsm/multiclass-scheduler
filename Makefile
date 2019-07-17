@@ -13,7 +13,6 @@ COMMON_DIR = src/common
 SERVER_DIR = src/server
 SEQ_DIR = src/sequencer
 SCHED_DIR = src/scheduler
-SCRIPT_DIR = src/script
 
 all: $(TARGETS) move
 
@@ -21,7 +20,6 @@ move:
 	mkdir -p $(RESULT_DIR)
 	mkdir -p $(BIN_DIR)
 	mv *.o $(TARGETS) $(BIN_DIR)
-	cp $(SCRIPT_DIR)/* $(BIN_DIR)
 
 client: $(CLIENT_OBJS)
 	$(CC) $(CLIENT_OBJS) -o client $(LDFLAGS)

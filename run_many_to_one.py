@@ -19,7 +19,7 @@ if len(sys.argv) > 1:
 
 directory=os.getcwd()
 
-tf = open("%s/conf/client_config.txt",'r')
+tf = open("%s/conf/client_config.txt"%directory,'r')
 ft = tf.readlines()
 tf.close()
 
