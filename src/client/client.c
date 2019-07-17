@@ -14,7 +14,7 @@
 #include "../common/common.h"
 #include "../common/cdf.h"
 #include "../common/conn.h"
-#include "../scheduler/multiclassqueue.h"
+#include "../scheduler/multiclass_scheduler.h"
 #include "../common/queue.h"
 
 bool verbose_mode = false;  /* by default, we don't give more detailed output */

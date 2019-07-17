@@ -3,11 +3,11 @@ CFLAGS = -g -c -Wall -pthread -lm -lrt -I/usr/include/mysql
 LDFLAGS = -pthread -lm -lrt
 
 TARGETS = client server sequencer
-CLIENT_OBJS = queue.o common.o cdf.o conn.o multiclassqueue.o seq_conn.o seqmanager.o client.o
+CLIENT_OBJS = queue.o common.o cdf.o conn.o multiclass_scheduler.o seq_conn.o seqmanager.o client.o
 SERVER_OBJS = common.o server.o
 SEQ_OBJS = common.o seq_conn.o sequencer.o
 BIN_DIR = bin
-RESULT_DIR = result
+RESULT_DIR = results
 CLIENT_DIR = src/client
 COMMON_DIR = src/common
 SERVER_DIR = src/server

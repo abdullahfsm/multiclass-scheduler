@@ -40,12 +40,6 @@ print "pload: %.1f" % pload
 print "load: %.1fMbps" % load
 print "num_flows: %d" % num_flows
 
-
-print "Refreshing servers+sequencers.."
-
-print "Making results directory.."
-os.system("mkdir %s/results"%directory)
-
 print "Starting servers.."
 for server in servers:
 	os.system("ssh -o StrictHostKeyChecking=no %s sudo killall server" % server)
