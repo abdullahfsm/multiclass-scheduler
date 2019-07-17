@@ -13,6 +13,7 @@ void init_multi_class_queue(struct multi_class_queue* mcq, char *file_name,
     char key[80] = {0};
     char line[256] = {0};
     unsigned int num_classes=0;
+    unsigned int class_id;
     unsigned int i;
 
     fd = fopen(file_name, "r");
@@ -21,7 +22,7 @@ void init_multi_class_queue(struct multi_class_queue* mcq, char *file_name,
     {
         remove_newline(line);
         sscanf(line, "%s", key);
-        if(!strcmp(key, "threshold"))
+        if(!strcmp(key, "class"))
             num_classes++;
     }
 
@@ -36,6 +37,7 @@ void init_multi_class_queue(struct multi_class_queue* mcq, char *file_name,
     mcq->schedulers = (pthread_t *)calloc(num_classes, sizeof(pthread_t));
     mcq->process_func_ptr=process_func_ptr;
 
+    // print >> fd , "class %d %d %d %d" % (t, thresholds[t], tos[t], mpl[t])
 
     num_classes=0;
 
@@ -47,10 +49,12 @@ void init_multi_class_queue(struct multi_class_queue* mcq, char *file_name,
         remove_newline(line);
         sscanf(line, "%s", key);
 
-        if (!strcmp(key, "threshold"))
+
+
+        if (!strcmp(key, "class"))
         {
-            sscanf(line, "%s %u %*s %u %*s %u", key, &(mcq->thresholds[num_classes]),
-                                        &(mcq->tos_map[num_classes]), &(mcq->multi_programming_level[num_classes]));
+            sscanf(line, "%s %u %u %u %u", key, &(class_id), &(mcq->thresholds[class_id]),
+                                        &(mcq->tos_map[class_id]), &(mcq->multi_programming_level[class_id]));
         
             num_classes++;
         }

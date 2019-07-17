@@ -6,22 +6,16 @@ pload=80.0
 # Default Num flows
 num_flows=100000
 
-for i in range(0,len(sys.argv),2):
-	if sys.argv[i] == "-n":
-		num_flows = int(sys.argv[i+1])	
-	elif sys.argv[i] == "-p":
-		pload = float(sys.argv[i+1])
-
-# Client IPs
-load = int((link_rate*pload)/(100.0))
-
-print "pload: %.1f" % pload
-print "load: %.1fMbps" % load
-print "num_flows: %d" % num_flows
+if len(sys.argv) > 1:
+	for i in range(1,len(sys.argv),2):
+		if sys.argv[i] == "-n":
+			num_flows = int(sys.argv[i+1])
+		elif sys.argv[i] == "-p":
+			pload = float(sys.argv[i+1])
 
 directory=os.getcwd()
 
-tf = open("%s/conf/client_config.txt",'r')
+tf = open("%s/conf/client_config.txt"%directory,'r')
 ft = tf.readlines()
 tf.close()
 
@@ -33,14 +27,21 @@ for f in ft:
 		servers.append(f.split(' ')[1])
 	elif "sequencer" in f:
 		sequencers.append(f.split(' ')[1])
-	elif "link_rate" in f:
+	elif "rate" in f:
 		link_rate = int(f.split(' ')[1].split('M')[0])
+
 
 assert link_rate > 0
 
 
-print "Refreshing servers+sequencers.."
+load = int((link_rate*pload)/(100.0))
 
+print "pload: %.1f" % pload
+print "load: %.1fMbps" % load
+print "num_flows: %d" % num_flows
+
+
+print "Refreshing servers+sequencers.."
 
 print "Making results directory.."
 os.system("mkdir %s/results"%directory)
@@ -54,7 +55,7 @@ print "Starting sequencers.."
 for seq in sequencers:
 	os.system("ssh -o StrictHostKeyChecking=no %s sudo killall sequencer" % seq)
 	os.system("ssh -o StrictHostKeyChecking=no %s sudo nohup %s/bin/sequencer &> /tmp/sequencer_logs &" % (seq, directory))
-	
+
 os.system("sleep 1")
 
 print "Starting client.."

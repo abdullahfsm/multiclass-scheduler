@@ -13,13 +13,14 @@ directory=os.getcwd()
 workload = "VL2_CDF.txt"
 
 # Link rate in Mbps
-link_rate="10000" 
+link_rate="10000"
 
 # Server info
 serverIP = ["10.1.1.7"]
 serverPort = ["5001"]
 
 # Sequencer info
+use_seq = 1
 sequencerIP = ["10.1.1.7"]
 sequencerPort = ["6001"]
 
@@ -30,7 +31,6 @@ tos=[4,32,40,56,72,128,152,184,192,224]
 thresholds=[3400,16176,545316,5159030,129372452,129372452]
 mpl=[1,1,1,1,1,1,1,1,1,1]
 ratios=[0.71,0.097,0.1,0.045,0.028,0.020]
-
 
 num_classes = len(thresholds)
 tos = tos[:num_classes]
@@ -54,8 +54,10 @@ for i in range(len(sequencerIP)):
 	print >> fd , "sequencer %s %s" % (sequencerIP[i],sequencerPort[i])
 print >> fd , "req_size_dist %s/conf/%s" % (directory, workload)
 print >> fd , "rate %sMbps 100" % link_rate
+print >> fd , "use_seq %d" % use_seq
 for t in range(len(thresholds)):
-	print >> fd , "threshold %d tos %d mpl %d" % (thresholds[t], tos[t], mpl[t])
+	# print >> fd , "threshold %d tos %d mpl %d" % (thresholds[t], tos[t], mpl[t])
+	print >> fd , "class %d %d %d %d" % (t, thresholds[t], tos[t], mpl[t])
 fd.close()
 
 # Make latest
