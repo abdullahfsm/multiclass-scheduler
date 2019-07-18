@@ -98,16 +98,6 @@ void release_seq(struct seq_manager *sm, unsigned int fc){
     smsg->active = sm->seq_inprog[fc]+1;
     send_UDP_seq_msg("10.1.1.255", BROADCAST, sm->send_fd, smsg);
     sm->seq_inprog[fc] = 0;
-
-    // if(use_seq && flow.id!=0 && isHeadBlocked(&dispatch_queues[fc]))
-    // if(use_seq && flow.id!=0 && isHeadBlocked(&dispatch_queues[fc])){
-    // #ifdef BLOGGING
-    // printf("broadcasting on socket: %d\n", send_fd);
-    // printf("BROADCASTING: id: %u seq: %u\n", flow.id, smsg.seq);
-    // printf("=====================================\n");
-    // fprintf(log_fd, "BROADCASTING: id: %u seq: %u\n", flow.id, smsg.seq);
-    // fprintf(log_fd, "=====================================\n");
-    // #endif
 }
 
 /* run broad cast listner */

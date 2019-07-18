@@ -113,6 +113,14 @@ class 5 129372452 128 1
 use_seq 1
 ```
 
+**[FIFO-LM](https://dl.acm.org/citation.cfm?id=2626322)**. Use two classes (short and long). First class's threshold is p90 of the workload, mpl is 1.
+Second class has large mpl (e.g., 10000). Disable sequencer for second class.
+For example, for a single client running VL2 workload, the config file should contain:
+```
+class 0 400000 4 1
+class 1 129372452 32 10000
+```
+
 
 ##Output
 A successful run of **client** creates a file with flow completion time results.

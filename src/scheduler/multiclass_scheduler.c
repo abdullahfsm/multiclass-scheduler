@@ -13,8 +13,9 @@ void init_multi_class_queue(struct multi_class_queue* mcq, char *file_name,
     char key[80] = {0};
     char line[256] = {0};
     unsigned int num_classes=0;
-    unsigned int class_id, threshold, tos, mpl;
+    unsigned int class_id, threshold, tos, mpl, use_seq;
     unsigned int i;
+
 
     fd = fopen(file_name, "r");
     
@@ -30,6 +31,7 @@ void init_multi_class_queue(struct multi_class_queue* mcq, char *file_name,
 
     mcq->num_classes = num_classes; 
     mcq->thresholds = (unsigned int*)calloc(max(num_classes, 1), sizeof(unsigned int));
+    mcq->use_seq = (unsigned int*)calloc(max(num_classes, 1), sizeof(unsigned int));
     mcq->tos_map = (unsigned int*)calloc(max(num_classes, 1), sizeof(unsigned int));
     mcq->multi_programming_level = (unsigned int*)calloc(max(num_classes, 1), sizeof(unsigned int));
     mcq->class_busy_mutex = (sem_t *)calloc(num_classes, sizeof(sem_t));
@@ -54,13 +56,15 @@ void init_multi_class_queue(struct multi_class_queue* mcq, char *file_name,
         if (!strcmp(key, "class"))
         {
             
-            sscanf(line, "%s %u %u %u %u", key, &(class_id), &(threshold),
-                                        &(tos), &(mpl));
+            sscanf(line, "%s %u %u %u %u %u", key, &(class_id), &(threshold),
+                                        &(tos), &(mpl), &(use_seq));
             
 
             mcq->thresholds[class_id] = threshold;
             mcq->tos_map[class_id] = tos;
             mcq->multi_programming_level[class_id] = mpl;
+            mcq->use_seq[class_id] = use_seq;
+
 
             /*
             sscanf(line, "%s %u %u %u %u", key, &(class_id), &(mcq->thresholds[class_id]),
@@ -70,14 +74,11 @@ void init_multi_class_queue(struct multi_class_queue* mcq, char *file_name,
             printf("DEBUG: %u %u %u %u \n",class_id, (mcq->thresholds[class_id]),
                                         (mcq->tos_map[class_id]), (mcq->multi_programming_level[class_id]));
             */
-
+            
+            if(use_seq)
+            	mcq->use_seq_any = true;
             num_classes++;
         }
-        else if (!strcmp(key, "use_seq"))
-        {
-            sscanf(line, "%s %u", key, &(mcq->use_seq));
-        }
-
     }
 
     fclose(fd);
@@ -103,7 +104,7 @@ void init_multi_class_queue(struct multi_class_queue* mcq, char *file_name,
 
 
     /* sequencer manager */
-    if(mcq->use_seq){
+    if(mcq->use_seq_any){
         init_seq_manager(&(mcq->sm), file_name);    
     }
 
@@ -125,7 +126,7 @@ void *fifo_scheduler(void *ptr)
         tmp = dequeue(&mcq->dispatch_queues[fc]);
 
         /* insert entry point of sequencer */
-        if(mcq->use_seq)
+        if(mcq->use_seq[fc])
             get_seq(&(mcq->sm), fc);
 
 
@@ -170,7 +171,7 @@ void response_handler(struct multi_class_queue *mcq, struct queue_data q_data)
     fc = get_class(mcq, q_data.size);
 
     /* exit point of sequencer */
-    if(mcq->use_seq)
+    if(mcq->use_seq[fc])
         release_seq(&(mcq->sm), fc);
 
     sem_post(&(mcq->class_busy_mutex[fc]));
@@ -201,18 +202,13 @@ void debugger(struct multi_class_queue *mcq)
     unsigned int i;
     printf("Number of classes: %d\n", mcq->num_classes);
     for(i=0; i<mcq->num_classes; i++){
-        printf("thresholds[%u]: %u tos_map[%u]: %u mpl[%u] %u\n", i, mcq->thresholds[i], i, mcq->tos_map[i], i, mcq->multi_programming_level[i]);
+        printf("thresholds[%u]: %u tos_map[%u]: %u mpl[%u]: %u use_seq[%u]: %u\n", i, mcq->thresholds[i], i, mcq->tos_map[i], i, mcq->multi_programming_level[i], i, mcq->use_seq[i]);
     }
-
-    if(mcq->use_seq)
-        printf("use_seq: true\n");
-    else
-        printf("use_seq: false\n");
 }
 
 void del_multi_class_queue(struct multi_class_queue *mcq)
 {
-    if(mcq->use_seq)
+    if(mcq->use_seq_any)
         del_seq_manager(&(mcq->sm));
 }
 

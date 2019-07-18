@@ -19,6 +19,8 @@ struct multi_class_queue
     unsigned int *multi_programming_level;
     unsigned int *thresholds;
     unsigned int *tos_map;
+    unsigned int *use_seq;
+    
 
     /* Required queues */
     struct Queue *dispatch_queues;
@@ -35,9 +37,8 @@ struct multi_class_queue
     void (*process_func_ptr)(unsigned int);
 
     /* sequencer manager */
-    unsigned int use_seq;
+    bool use_seq_any;
     struct seq_manager sm;
-
 };
 
 struct input
