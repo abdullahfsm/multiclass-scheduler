@@ -75,50 +75,42 @@ The format is a sequence of key and value(s), one key per line.
 sequencer 192.168.1.51 5001
 ```
 
-* **class:** classID, its threshold, unique ToS and mpl.
+* **class:** classID, threshold, ToS, mpl, use_seq (1/0).
 ```
-class 0 3400 4 1
+class 0 3400 4 1 1
 ```
 There must atleast be one class entry.
-
-* **use_seq:** To use (1) or not use (0) the sequencer.
-```
-use_seq 0
-```
 
 ## Different Scheduling Policies
 We describe how different policies can be realised by changing the configuration file (manually or overriding setup.py):
 
 **FIFO**. Use a single class, with any threshold, and 1 mpl and enable sequencer. No rate limit is needed at server: 
 ```
-class 0 1000 4 1
-use_seq 1
+class 0 1000 4 1 1
 ```
 
 **PS**. Use a single class, with any threshold, and a large mpl (e.g., 10000). Disable sequencer. No rate limit is needed at server:
 ```
-class 0 1000 4 10000
-use_seq 0
+class 0 1000 4 10000 0
 ```
 
 **2D**. See ./setup/class_description.tr for thresholds for different workloads.
 For example for VL2 workload:
 ```
-class 0 3400 4 1
-class 1 16176 32 1
-class 2 545316 40 1
-class 3 5159030 56 1
-class 4 129372452 72 1
-class 5 129372452 128 1
-use_seq 1
+class 0 3400 4 1 1
+class 1 16176 32 1 1
+class 2 545316 40 1 1
+class 3 5159030 56 1 1
+class 4 129372452 72 1 1
+class 5 129372452 128 1 1
 ```
 
 **[FIFO-LM](https://dl.acm.org/citation.cfm?id=2626322)**. Use two classes (short and long). First class's threshold is p90 of the workload, mpl is 1.
 Second class has large mpl (e.g., 10000). Disable sequencer for second class.
-For example, for a single client running VL2 workload, the config file should contain:
+For example, for running VL2 workload, the config file should contain:
 ```
-class 0 400000 4 1
-class 1 129372452 32 10000
+class 0 400000 4 1 1
+class 1 129372452 32 10000 0
 ```
 
 
