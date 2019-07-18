@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -c -Wall -pthread -lm -lrt -I/usr/include/mysql
+CFLAGS = -g -c -Wall -pthread -lm -lrt
 LDFLAGS = -pthread -lm -lrt
 
 TARGETS = client server sequencer

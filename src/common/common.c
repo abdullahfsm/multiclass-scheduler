@@ -6,7 +6,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
 #include <math.h>
 
 #include "common.h"
@@ -63,63 +62,6 @@ unsigned int read_exact(int fd, char *buf, size_t count, size_t max_per_read, bo
     return bytes_total_read;
 }
 
-unsigned int read_exact_time(int fd, char *buf, size_t count, size_t max_per_read, bool dummy_buf,int fid)
-{
-    unsigned int bytes_total_read = 0;  /* total number of bytes that have been read */
-    unsigned int bytes_to_read = 0; /* maximum number of bytes to read in next read() call */
-    char *cur_buf = NULL;   /* current location */
-    int n;  /* number of bytes read in current read() call */
-    struct timeval curtime;
-    struct timeval starttime;
-    gettimeofday(&starttime, NULL);
-    FILE *tf = NULL;
-    char fname[80];
-    sprintf(fname,"flow%d.txt",fid);    
-    tf = fopen(fname, "a");
-    
-    if (!buf)
-        return 0;
-
-    fprintf(tf,"client read. Count:%lu\n",count);
-
-    while (count > 0)
-    {
-
-        fprintf(tf,"client read. Bytes read:%d\n",bytes_total_read);
-
-        bytes_to_read = (count > max_per_read) ? max_per_read : count;
-        cur_buf = (dummy_buf) ? buf : (buf + bytes_total_read);
-        n = read(fd, cur_buf, bytes_to_read);
-
-        gettimeofday(&curtime, NULL);
-
-        if (n <= 0)
-        {
-            if (n < 0)
-                printf("Error: read() in read_exact()");
-            break;
-        }
-        else
-        {
-            bytes_total_read += n;
-            count -= n;
-        }
-        // if(tf!=NULL){
-        //     fprintf(tf,"%lf\n", (8000000.0*bytes_total_read)/(tt));
-        // }
-    }
-    
-    
-
-    fprintf(tf,"client read. Bytes read:%d\n",bytes_total_read);
-
-    if(tf!=NULL){
-        fclose(tf);
-    }
-
-    return bytes_total_read;
-}
-
 /*
  * This function attemps to write exactly count bytes from the buffer starting
  * at buf to file referred to by file descriptor fd. It repeatedly calls
@@ -171,13 +113,11 @@ unsigned int write_exact(int fd, char *buf, size_t count, size_t max_per_write,
         {
             bytes_total_write += n;
             count -= n;
-            /*
             if (sleep_overhead_us < sleep_us)
             {
                 usleep(sleep_us - sleep_overhead_us);
                 sleep_us = 0;
             }
-            */
         }
     }
 
@@ -243,20 +183,17 @@ bool write_flow(int fd, struct flow_metadata *f, unsigned int sleep_overhead_us)
     }
 
     /* use min_write_buf with rate limiting */
-    // if (f->rate > 0)
-    // {
-    //     write_buf = min_write_buf;
-    //     max_per_write = TG_MIN_WRITE;
-    // }
+    if (f->rate > 0)
+    {
+        write_buf = min_write_buf;
+        max_per_write = TG_MIN_WRITE;
+    }
     /* use max_write_buf w/o rate limiting */
-    // else
-    // {
-    //     write_buf = max_write_buf;
-    //     max_per_write = TG_MAX_WRITE;
-    // }
-
-    write_buf = max_write_buf;
-    max_per_write = TG_MAX_WRITE;
+    else
+    {
+        write_buf = max_write_buf;
+        max_per_write = TG_MAX_WRITE;
+    }
 
     /* generate the flow response */
     result = write_exact(fd, write_buf, f->size, max_per_write, f->rate, f->tos, sleep_overhead_us, true);
@@ -341,13 +278,4 @@ void display_progress(unsigned int num_finished, unsigned int num_total)
 
     printf("Generate %u / %u (%.1f%%) requests\r", num_finished, num_total, (num_finished * 100.0) / num_total);
     fflush(stdout);
-}
-
-/* calculate FCTs in us */
-unsigned long long fct_calc(struct timeval start,struct timeval stop) {
-    return (1000000.0*(stop.tv_sec - start.tv_sec) + (stop.tv_usec - start.tv_usec));
-}
-
-unsigned long long timeval2us(struct timeval t){
-    return 1000000.0*t.tv_sec + t.tv_usec;
 }

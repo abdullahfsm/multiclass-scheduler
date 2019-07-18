@@ -12,7 +12,7 @@ struct queue_data
 	int id;
     unsigned int size;
     unsigned int seq;
-    unsigned int fc;
+    unsigned int jc;
 
 	// bool blocking;
 	// bool batch_start;

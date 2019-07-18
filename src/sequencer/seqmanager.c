@@ -59,7 +59,7 @@ void get_seq(struct seq_manager *sm, unsigned int fc)
     smsg->fc = fc;
 
     /* Each class has its own connection to the sequencer*/
-    struct conn_node *node = get_node_by_index(&(sm->sequencer_conns), smsg->fc);
+    struct conn_node *node = get_node_by_index(&(sm->sequencer_conns), fc);
     
     /* get seq from sequencer */
     send_seq_msg(node->sockfd, smsg);
@@ -114,7 +114,7 @@ void *run_broadcast_listener(void *ptr){
         recv_UDP_seq_msg(sm->recv_fd, smsg);
         fc = smsg->fc;
         enqueue(&(sm->broadcast_listen_queues[fc]), (struct queue_data){.id = 0,
-                .seq=smsg->active, .fc=fc});
+                .seq=smsg->active, .jc=fc});
         sem_post(&(sm->broadcast_listen_queues[fc].sem_mutex));
     }
 }

@@ -92,7 +92,7 @@ void init_multi_class_queue(struct multi_class_queue* mcq, char *file_name,
     for (i = 0; i < num_classes; i++){
         args = (struct input *)malloc(sizeof(struct input));
         args->mcq = mcq;
-        args->fc = i;
+        args->jc = i;
 
         create_queue(&(mcq->dispatch_queues[i]));
         sem_init(&(mcq->class_busy_mutex[i]),0,mcq->multi_programming_level[i]);
@@ -100,7 +100,7 @@ void init_multi_class_queue(struct multi_class_queue* mcq, char *file_name,
     }
 
     create_queue(&(mcq->classifying_queue));
-    pthread_create(&(mcq->classifier), NULL, classify_flow,(void *)(mcq));
+    pthread_create(&(mcq->classifier), NULL, classify_job,(void *)(mcq));
 
 
     /* sequencer manager */
@@ -116,18 +116,18 @@ void *fifo_scheduler(void *ptr)
 
     struct input *args = (struct input *)ptr;
     struct multi_class_queue *mcq = args->mcq;
-    unsigned int fc = args->fc;
+    unsigned int jc = args->jc;
     struct queue_data *tmp;
     
     while(1){
-        sem_wait(&(mcq->dispatch_queues[fc].sem_mutex));
-        sem_wait(&(mcq->class_busy_mutex[fc]));
+        sem_wait(&(mcq->dispatch_queues[jc].sem_mutex));
+        sem_wait(&(mcq->class_busy_mutex[jc]));
         
-        tmp = dequeue(&mcq->dispatch_queues[fc]);
+        tmp = dequeue(&mcq->dispatch_queues[jc]);
 
         /* insert entry point of sequencer */
-        if(mcq->use_seq[fc])
-            get_seq(&(mcq->sm), fc);
+        if(mcq->use_seq[jc])
+            get_seq(&(mcq->sm), jc);
 
 
         if(tmp!=NULL){
@@ -140,20 +140,20 @@ void *fifo_scheduler(void *ptr)
     return (void*)0;
 }
 
-void *classify_flow(void *ptr){
+void *classify_job(void *ptr){
 
     struct multi_class_queue *mcq = (struct multi_class_queue *)ptr;
     struct queue_data *tmp;
-    unsigned int fc;
+    unsigned int jc;
     while(1){
         sem_wait(&(mcq->classifying_queue.sem_mutex));
 
         tmp = dequeue(&mcq->classifying_queue);
 
         if(tmp!=NULL){            
-            fc = get_class(mcq, tmp->size);
-            enqueue(&(mcq->dispatch_queues[fc]), (struct queue_data){.id = tmp->id, .seq=0, .size=tmp->size, .fc=fc});
-            sem_post(&(mcq->dispatch_queues[fc].sem_mutex));
+            jc = get_class(mcq, tmp->size);
+            enqueue(&(mcq->dispatch_queues[jc]), (struct queue_data){.id = tmp->id, .seq=0, .size=tmp->size, .jc=jc});
+            sem_post(&(mcq->dispatch_queues[jc].sem_mutex));
         }
     }
     return (void*)0;
@@ -167,25 +167,25 @@ void request_handler(struct multi_class_queue *mcq, struct queue_data q_data)
 
 void response_handler(struct multi_class_queue *mcq, struct queue_data q_data)
 {
-    unsigned fc;
-    fc = get_class(mcq, q_data.size);
+    unsigned jc;
+    jc = get_class(mcq, q_data.size);
 
     /* exit point of sequencer */
-    if(mcq->use_seq[fc])
-        release_seq(&(mcq->sm), fc);
+    if(mcq->use_seq[jc])
+        release_seq(&(mcq->sm), jc);
 
-    sem_post(&(mcq->class_busy_mutex[fc]));
+    sem_post(&(mcq->class_busy_mutex[jc]));
 }
 
 unsigned int get_class(struct multi_class_queue *mcq, unsigned int size)
 {
-    unsigned i, fc;
+    unsigned i, jc;
 
 
     for(i=0;i<mcq->num_classes;i++){
         if(size<=mcq->thresholds[i]){
-            fc=i;
-            return fc;
+            jc=i;
+            return jc;
         }
     }
 

@@ -487,7 +487,6 @@ void read_config(char *file_name)
             }
 
             init_cdf(req_size_dist);
-            set_interpolation(req_size_dist,1);
             load_cdf(req_size_dist, dist_file_name);
             if (verbose_mode)
             {
@@ -676,7 +675,7 @@ void *listen_connection(void *ptr)
         
         if(flow.id != 0){
             response_handler(mcq, (struct queue_data) {.id = flow.id-1, .size=req_size[flow.id-1],
-                        .seq=0, .fc=0});    
+                        .seq=0, .jc=0});    
         }
     }
 
@@ -707,7 +706,7 @@ void run_requests()
 
         gettimeofday(&req_start_time[i], NULL);
         request_handler(mcq, (struct queue_data) {.id = i, .size=req_size[i],
-                        .seq=0, .fc=0});
+                        .seq=0, .jc=0});
 
         if (!verbose_mode && i + 1 >= k * req_total_num / 100)
         {

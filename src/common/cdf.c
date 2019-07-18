@@ -11,14 +11,9 @@ void init_cdf(struct cdf_table *table)
     table->max_entry = TG_CDF_TABLE_ENTRY;
     table->min_cdf = 0;
     table->max_cdf = 1;
-    table->interpolation = LINEAR;
+
     if (!(table->entries))
         perror("Error: malloc entries in init_cdf()");
-}
-
-/* set interpolation discrete or linear */
-void set_interpolation(struct cdf_table *table,int interpolation){
-    table->interpolation = interpolation;
 }
 
 /* free resources of a CDF distribution */
@@ -85,11 +80,6 @@ void print_cdf(struct cdf_table *table)
 /* get average value of CDF distribution */
 double avg_cdf(struct cdf_table *table)
 {
-
-    if(table->interpolation==DISCRETE){
-        return avg_cdf_discrete(table);
-    }
-
     int i = 0;
     double avg = 0;
     double value, prob;
@@ -109,45 +99,8 @@ double avg_cdf(struct cdf_table *table)
             value = (table->entries[i].value + table->entries[i-1].value) / 2;
             prob = table->entries[i].cdf - table->entries[i-1].cdf;
         }
-
-        // printf("DEBUG in cdf.c: value: %0.1f prob: %0.1f\n", value,prob);
-
-
         avg += (value * prob);
     }
-
-    // printf("DEBUG in cdf.c: avg: %0.1f\n", avg);
-    return avg;
-}
-
-/* get average value of CDF distribution */
-double avg_cdf_discrete(struct cdf_table *table)
-{
-    int i = 0;
-    double avg = 0;
-    double value, prob;
-
-    if (!table)
-        return 0;
-
-    for (i = 0; i < table->num_entry; i++)
-    {
-        if (i == 0)
-        {
-            continue;
-        }
-        else
-        {
-            value = table->entries[i].value;
-            prob = table->entries[i].cdf - table->entries[i-1].cdf;
-        }
-        
-        // printf("DEBUG in cdf.c: discretevalue: %0.1f prob: %0.1f\n", value,prob);
-
-
-        avg += (value * prob);
-    }
-    // printf("DEBUG in cdf.c: discrete avg: %0.1f\n", avg);
 
     return avg;
 }
@@ -169,11 +122,6 @@ double rand_range(double min, double max)
 /* generate a random value based on CDF distribution */
 double gen_random_cdf(struct cdf_table *table)
 {
-
-    if(table->interpolation==DISCRETE){
-        return gen_random_cdf_discrete(table);
-    }
-
     int i = 0;
     double x;
     /* printf("%f %f %f\n", x, table->min_cdf, table->max_cdf); */
@@ -191,28 +139,6 @@ double gen_random_cdf(struct cdf_table *table)
                 return interpolate(x, 0, 0, table->entries[i].cdf, table->entries[i].value);
             else
                 return interpolate(x, table->entries[i-1].cdf, table->entries[i-1].value, table->entries[i].cdf, table->entries[i].value);
-        }
-    }
-
-    return table->entries[table->num_entry-1].value;
-}
-
-/* Generate a random value (discrete) based on CDF distribution */
-double gen_random_cdf_discrete(struct cdf_table *table)
-{
-    int i = 0;
-    double x;
-
-    if (!table)
-        return 0;
-
-    x = rand_range(table->min_cdf, table->max_cdf);
-
-    for (i = 0; i < table->num_entry; i++)
-    {
-        if (x <= table->entries[i].cdf)
-        {
-            return table->entries[i].value;
         }
     }
 

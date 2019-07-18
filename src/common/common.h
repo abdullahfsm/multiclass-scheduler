@@ -10,7 +10,7 @@ struct flow_metadata
     unsigned int id;    /* ID */
     unsigned int size;  /* flow size (bytes) */
     unsigned int tos;   /* ToS value */
-    unsigned int rate;  /* sending rate (Mbps) */ 
+    unsigned int rate;  /* sending rate (Mbps) */
 };
 
 /* flow meata data size */
@@ -26,7 +26,7 @@ struct flow_metadata
 /* maximum amount of data to read in a 'recv' system call */
 #define TG_MAX_READ (1 << 20)
 /* default initial number of TCP connections per pair */
-#define TG_PAIR_INIT_CONN 1
+#define TG_PAIR_INIT_CONN 5
 /* default goodput / link capacity ratio */
 #define TG_GOODPUT_RATIO (1448.0 / (1500 + 14 + 4 + 8 + 12))
 
@@ -44,8 +44,7 @@ struct flow_metadata
 
 /* read exactly 'count' bytes from a socket 'fd' */
 unsigned int read_exact(int fd, char *buf, size_t count, size_t max_per_read, bool dummy_buf);
-/* works as above but also reports throughput to a buffer */
-unsigned int read_exact_time(int fd, char *buf, size_t count, size_t max_per_read, bool dummy_buf,int fid);
+
 /* write exactly 'count' bytes into a socket 'fd' */
 unsigned int write_exact(int fd, char *buf, size_t count, size_t max_per_write,
     unsigned int rate_mbps, unsigned int tos, unsigned int sleep_overhead_us, bool dummy_buf);
@@ -77,8 +76,4 @@ unsigned int gen_value_weight(unsigned int *vals, unsigned int *weights, unsigne
 /* display progress */
 void display_progress(unsigned int num_finished, unsigned int num_total);
 
-/* calculate FCTs in us */
-unsigned long long fct_calc(struct timeval start,struct timeval stop);
-
-unsigned long long timeval2us(struct timeval t);
 #endif

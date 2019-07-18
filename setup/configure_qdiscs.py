@@ -1,7 +1,7 @@
 import os, sys
 
 def readargs(args):
-	global link_rate, ratios, tos
+	global link_rate, ratios, tos, interface
 
 	i=0
 
@@ -14,16 +14,11 @@ def readargs(args):
 		elif(args[i]=='-t'):
 			tos=args[i+1]
 			tos = map(lambda x: int(x),tos.split(','))
+		elif(args[i]=='i'):
+			interface=args[i+1]
 		i+=2
 
-os.system("cat /var/emulab/boot/ifmap > ifmapinfo.dat")
-fd = open("ifmapinfo.dat",'r')
-ft = fd.readlines()
-fd.close()
-os.system("rm ifmapinfo.dat")
-
-interface = ft[0].split(' ')[0]
-
+interface = None
 link_rate = None
 ratios = None
 tos = None

@@ -44,13 +44,13 @@ struct multi_class_queue
 struct input
 {
   struct multi_class_queue *mcq;
-  unsigned int fc; 
+  unsigned int jc; 
 };
 
 void init_multi_class_queue(struct multi_class_queue* mcq, char *file_name,
                             void (*process_func_ptr)(unsigned int));
 void *fifo_scheduler(void *ptr);
-void *classify_flow(void *ptr);
+void *classify_job(void *ptr);
 void request_handler(struct multi_class_queue *mcq, struct queue_data q_data);
 void response_handler(struct multi_class_queue *mcq, struct queue_data q_data);
 unsigned int get_class(struct multi_class_queue *mcq, unsigned int size);

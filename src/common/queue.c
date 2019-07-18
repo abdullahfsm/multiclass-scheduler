@@ -17,7 +17,7 @@ void enqueue(struct Queue *queue, struct queue_data data)
 	tmp->data.id = data.id;
     tmp->data.size = data.size;
     tmp->data.seq = data.seq;
-    tmp->data.fc = data.fc;
+    tmp->data.jc = data.jc;
 
     // tmp->data.blocking = data.blocking;
     // tmp->data.batch_start = data.batch_start;
@@ -125,7 +125,7 @@ struct queue_data *dequeue(struct Queue *queue)
 	data->id = queue->head->data.id;
     data->size = queue->head->data.size;
     data->seq = queue->head->data.seq;
-    data->fc = queue->head->data.fc;
+    data->jc = queue->head->data.jc;
 
 
 
