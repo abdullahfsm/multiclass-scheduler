@@ -44,19 +44,52 @@ Class rates are enforced at the **server** using Linux HTB.
 
 ## Build
 The setup.py script in the main directory is responsible for building executables and setting up the configuration file to be used by the **client** and **MCS**. Additionally, it sets up class rates at the **server**.
-
 This script takes as input a configuration file named setup_config.tr.
-The following need to be modified before the script can run:
+The following describes how the setup_config.tr needs to be modified before the script can run:
 
-* **workload** see ./conf for available workloads
-* **link_rate** specified in Mbps
-* **serverIP** IP address of server. Note that it is assumed the server is reachable from the machine calling this script
-* **serverPort** port on which server will listen
-* **serverInterface** device name corrosponding to the serverIP. This is used for setting up rates
-* **sequencerIP** IP address of sequencer. Note that it is assumed the sequencer is reachable from the machine calling this script
-* **sequencerPort** port on which sequencer will listen
-* **thresholds** comma seperated list of class thresholds. For a list of thresholds for different workloads for 2D's policy, see ./setup/class_description.tr
-* **ratios** comma seperated list of class ratios. For a list of ratios for different workloads for 2D's policy, see ./setup/class_description.tr
+### Configuration File
+
+This script specifies information for the **client** (e.g., servers, workload).
+It also specifies sequencers, class thresholds, tos mapping and mpl to be used by the **MCS**. 
+
+The format is a sequence of key and value, one key per line.
+
+* **workload:** see ./conf for available workloads
+```
+workload VL2_CDF.txt
+```
+* **link_rate:** specified in Mbps
+```
+link_rate 10000
+```
+* **serverIP:** IP address of server. Note that it is assumed the server is reachable from the machine calling this script
+```
+serverIP 10.1.1.7
+```
+* **serverPort:** port on which server will listen
+```
+serverPort 5001
+```
+* **serverInterface:** device name corrosponding to the serverIP. This is used for setting up rates
+```
+serverInterface enp6s0f2
+```
+* **sequencerIP:** IP address of sequencer. Note that it is assumed the sequencer is reachable from the machine calling this script
+```
+sequencerIP 10.1.1.7
+```
+* **sequencerPort:** port on which sequencer will listen
+```
+sequencerPort 6001
+```
+* **thresholds:** comma seperated list of class thresholds. For a list of thresholds for different workloads for 2D's policy, see ./setup/class_description.tr
+```
+thresholds 3400,16176,545316,5159030,129372452,129372452
+```
+* **ratios:** comma seperated list of class ratios. For a list of ratios for different workloads for 2D's policy, see ./setup/class_description.tr
+```
+ratios 0.71,0.097,0.1,0.045,0.028,0.020
+```
 
 After the setup_config.tr file has been correctly modified, run ```python setup.py```.
 You can see the executables in the ./bin folder and the client configuration file in the ./conf folder.
@@ -72,26 +105,10 @@ For instance, to start a client generating 5000 flows at 50.0% load, run the fol
 ```
 python run_one_to_one.py -n 5000 -p 50.0
 ```
-
-## Configuration File
-The client configuration file (see conf/client_config.txt) specifies information for the **client** (e.g., servers, workload).
-It also specifies list of sequencers, class thresholds, tos mapping and mpl to be used by the **MCS**. This file is automatically created by running the setup.py file but can also be modified directly.
-
-The format is a sequence of key and value(s), one key per line.
-
-* **sequencer:** IP address and TCP port of sequencer.
-```
-sequencer 192.168.1.51 5001
-```
-
-* **class:** classID, threshold, ToS, mpl, use_seq (1/0).
-```
-class 0 3400 4 1 1
-```
-There must atleast be one class entry.
-
 ## Different Scheduling Policies
-We describe how different policies can be realised by changing the configuration file (manually or overriding setup.py):
+We describe how different policies can be realised by changing the client configuration file (see ./conf/client_text).
+The important fields are the *class* fields.
+The format of the class field is: classID threshold ToS mpl use_seq(1/0)
 
 **FIFO**. Use a single class, with any threshold, and 1 mpl and enable sequencer. No rate limit is needed at server: 
 ```
@@ -122,7 +139,6 @@ class 0 400000 4 1 1
 class 1 129372452 32 10000 0
 ```
 
-
 ##Output
 A successful run of **client** creates a file with flow completion time results.
 
@@ -130,5 +146,3 @@ In files with flow completion times, each line gives flow size (in bytes), flow 
 
 ##Contact
 For questions, please contact Abdullah Bin Faisal (https://www.eecs.tufts.edu/~abdullah/).
-
-
