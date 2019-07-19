@@ -16,7 +16,8 @@ def config_parser(fname):
 
 	for f in ft:
 		key,val = f.split(' ')
-
+		val = val.strip()
+		
 		if key == "workload":
 			workload = val
 		elif key == "link_rate":
@@ -35,9 +36,6 @@ def config_parser(fname):
 			thresholds = val
 		elif key == "ratios":
 			ratios = val
-
-
-
 
 # Full path of main directory
 directory=os.getcwd()
@@ -59,6 +57,8 @@ config_parser("setup_config.tr")
 tos=[4,32,40,56,72,128,152,184,192,224]
 mpl=[1,1,1,1,1,1,1,1,1,1]
 use_seq=[1,1,1,1,1,1,1,1,1,1]
+thresholds = map(lambda x: int(x), thresholds.split(','))
+
 
 num_classes = len(thresholds)
 tos = tos[:num_classes]
@@ -73,22 +73,19 @@ assert sequencerIP is not None
 assert sequencerPort is not None
 assert thresholds is not None
 assert ratios is not None
-
-assert len(ratios) == len(thresholds)
-assert len(tos) == len(thresholds)
-assert len(mpl) == len(thresholds)
+assert len(ratios.split(',')) == num_classes
 
 # Setup qdisc at server
 print "Setting up qdiscs.."
-os.system("ssh -o StrictHostKeyChecking=no %s sudo python %s/setup/configure_qdiscs.py -l %s -r %s -t %s -i %s"%(ServerInfo["ip"], directory, link_rate, arr2str(ratios), arr2str(tos), ServerInfo["interface"]))
+os.system("ssh -o StrictHostKeyChecking=no %s sudo python %s/setup/configure_qdiscs.py -l %s -r %s -t %s -i %s"%(serverIP, directory, link_rate, ratios, arr2str(tos), serverInterface))
 print "Installed qdiscs"
 
 # creating config files
 print "Creating config file..."
 fd = open('%s/conf/client_config.txt'%directory,'w')
 
-print >> fd , "server %s %s" % (ServerInfo["ip"],ServerInfo["port"])
-print >> fd , "sequencer %s %s" % (SequencerInfo["ip"],SequencerInfo["port"])
+print >> fd , "server %s %s" % (serverIP,serverPort)
+print >> fd , "sequencer %s %s" % (sequencerIP,sequencerPort)
 print >> fd , "req_size_dist %s/conf/%s" % (directory, workload)
 print >> fd , "rate %sMbps 100" % link_rate
 
@@ -98,4 +95,5 @@ for t in range(len(thresholds)):
 fd.close()
 
 # Make latest
-os.system("sudo make")
+os.system("make clean")
+os.system("make")
