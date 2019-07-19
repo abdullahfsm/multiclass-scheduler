@@ -54,9 +54,9 @@ The following need to be modified before the script can run:
 * **serverPort** port on which server will listen
 * **serverInterface** device name corrosponding to the serverIP. This is used for setting up rates
 * **sequencerIP** IP address of sequencer. Note that it is assumed the sequencer is reachable from the machine calling this script
-* **sequencerPort** Port on which sequencer will listen
+* **sequencerPort** port on which sequencer will listen
 * **thresholds** comma seperated list of class thresholds. For a list of thresholds for different workloads for 2D's policy, see ./setup/class_description.tr
-* **ratios** comma seperated list of class ratios. For a list of thresholds for different workloads for 2D's policy, see ./setup/class_description.tr
+* **ratios** comma seperated list of class ratios. For a list of ratios for different workloads for 2D's policy, see ./setup/class_description.tr
 
 After the setup_config.tr file has been correctly modified, run ```python setup.py```.
 You can see the executables in the ./bin folder and the client configuration file in the ./conf folder.
@@ -75,7 +75,7 @@ python run_one_to_one.py -n 5000 -p 50.0
 
 ## Configuration File
 The client configuration file (see conf/client_config.txt) specifies information for the **client** (e.g., servers, workload).
-It also specifies list of sequencers, class thresholds, tos mapping and mpl to be used by the **MCS**.
+It also specifies list of sequencers, class thresholds, tos mapping and mpl to be used by the **MCS**. This file is automatically created by running the setup.py file but can also be modified directly.
 
 The format is a sequence of key and value(s), one key per line.
 
@@ -103,7 +103,7 @@ class 0 1000 4 1 1
 class 0 1000 4 10000 0
 ```
 
-**2D**. See ./setup/class_description.tr for thresholds for different workloads.
+**[2D](https://dl.acm.org/citation.cfm?id=3281429)**. See ./setup/class_description.tr for thresholds for different workloads.
 For example for VL2 workload:
 ```
 class 0 3400 4 1 1
