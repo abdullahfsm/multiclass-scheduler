@@ -45,6 +45,7 @@ Class rates are enforced at the **server** using Linux HTB.
 ## Build
 The setup.py script in the main directory is responsible for building executables and setting up the configuration file to be used by the **client** and **MCS**. Additionally, it sets up class rates at the **server**.
 
+<<<<<<< HEAD
 The following need to be modified before the script can run:
 
 * **workload:** type=String, see ./conf for available workloads
@@ -52,11 +53,18 @@ The following need to be modified before the script can run:
 * **ServerInfo:** type=dictionary of Strings, (1) ip, (2) port, (3) interface need to be specified
 * **SequencerInfo:** type=dictionary of Strings, (1) ip, (2) port need to be specified
 
+=======
+The workload, link rate, server IP+port and sequencer IP+port need to be set in the setup.py file.
+>>>>>>> 1bb422fb774cf2fc30a165f010a367e9673eb7ef
 To run 2D's policy, corrosponding to the selected workload, the right thresholds and rates needs to be specified in the setup.py file. For a list of threshold and rates for different workloads, see ./setup/class_description.tr
 
 After the setup.py file has been modified, run ```python setup.py```.
 You can see the executables in the ./bin folder and the configuration file in the ./conf folder. 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1bb422fb774cf2fc30a165f010a367e9673eb7ef
 ## Single Client-Single Server experiment
 
 The run_one_to_one.py script starts a client-server traffic generator.

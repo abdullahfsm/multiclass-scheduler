@@ -5,40 +5,74 @@ def arr2str(arr):
 	arr = ','.join(arr)
 	return arr
 
+def config_parser(fname):
+	global workload, link_rate, serverIP, serverPort, serverInterface
+	global sequencerIP, sequencerPort, thresholds, ratios
+
+	tf = open(fname,'r')
+	ft = tf.readlines()
+	tf.close()
+
+
+	for f in ft:
+		key,val = f.split(' ')
+
+		if key == "workload":
+			workload = val
+		elif key == "link_rate":
+			link_rate = val
+		elif key == "serverIP":
+			serverIP = val
+		elif key == "serverPort":
+			serverPort = val
+		elif key == "serverInterface":
+			serverInterface = val
+		elif key == "sequencerIP":
+			sequencerIP = val
+		elif key == "sequencerPort":
+			sequencerPort = val
+		elif key == "thresholds":
+			thresholds = val
+		elif key == "ratios":
+			ratios = val
+
+
+
 
 # Full path of main directory
 directory=os.getcwd()
 
 # Workload
-workload = "VL2_CDF.txt"
+workload = None
+link_rate = None
+serverIP = None
+serverPort = None
+serverInterface = None
+sequencerIP = None
+sequencerPort = None
+thresholds = None
+ratios = None
 
-# Link rate in Mbps
-link_rate="10000"
+config_parser("setup_config.tr")
 
-# Server info
-ServerInfo = {
-	"ip": "10.1.1.7",
-	"port": "5001",
-	"interface": "ensp6040"
-}
 
-SequencerInfo = {
-	"ip": "10.1.1.7",
-	"port": "6001"
-}
-
-# Class variables (thresholds, rates=linkrate*ratios, multiplexing level (1=FIFO/class))
-# These can be chosen according to workload (see setup/class_description.tr)
 tos=[4,32,40,56,72,128,152,184,192,224]
-
-thresholds=[3400,16176,545316,5159030,129372452,129372452]
 mpl=[1,1,1,1,1,1,1,1,1,1]
 use_seq=[1,1,1,1,1,1,1,1,1,1]
-ratios=[0.71,0.097,0.1,0.045,0.028,0.020]
 
 num_classes = len(thresholds)
 tos = tos[:num_classes]
 mpl=mpl[:num_classes]
+
+assert workload is not None
+assert link_rate is not None
+assert serverIP is not None
+assert serverPort is not None
+assert serverInterface is not None
+assert sequencerIP is not None
+assert sequencerPort is not None
+assert thresholds is not None
+assert ratios is not None
 
 assert len(ratios) == len(thresholds)
 assert len(tos) == len(thresholds)

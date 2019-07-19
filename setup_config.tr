@@ -1,0 +1,9 @@
+workload VL2_CDF.txt
+link_rate 10000
+serverIP 10.1.1.7
+serverPort 5001
+serverInterface ensp6040
+sequencerIP 10.1.1.7
+sequencerPort 6001
+thresholds 3400,16176,545316,5159030,129372452,129372452
+ratios 0.71,0.097,0.1,0.045,0.028,0.020
